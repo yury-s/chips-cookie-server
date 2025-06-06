@@ -10,10 +10,7 @@ import { execSync } from 'child_process';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Azure App Service terminates HTTPS at the front-end (Azure Load Balancer) →
-// forwards to your app over HTTP on the internal port.
-const port = process.env.PORT || 3000;
-const app = express(); // origin1
+const app = express();
 
 // Configure CORS for both apps
 app.use(cors({
@@ -36,10 +33,16 @@ function createUrls(origin1, origin2) {
   };
 }
 
+// Azure App Service terminates HTTPS at the front-end (Azure Load Balancer) →
+// forwards to your app over HTTP on the internal port.
+const port = process.env.PORT || 3000;
+const hostname = process.env.HOSTNAME || `localhost`;
+const ip = process.env.IP || `127.0.0.1`;
+
 // Create URLs for both origins
 const urls = createUrls(
-  `https://localhost:${port}`,
-  `https://127.0.0.1:${port}`
+  `https://${hostname}:${port}`,
+  `https://${ip}:${port}`
 );
 
 // Common cookie handlers for both apps

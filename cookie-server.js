@@ -76,7 +76,7 @@ function addCommonCookieHandlers(app, urls) {
         </head>
         <body>
           <h1>Cookie Test URLs</h1>
-          
+
           <div class="button-group">
             <h2>Read Cookie Tests</h2>
             <a href="${urls.read_origin1}" class="nav-link">Read Cookie (Origin 1)</a>
@@ -101,7 +101,7 @@ function addCommonCookieHandlers(app, urls) {
   app.get('/read-cookie.html', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
     const cookies = req.headers.cookie?.split(';').map(c => c.trim()).sort() || [];
-    
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -159,13 +159,53 @@ function addCommonCookieHandlers(app, urls) {
   // Set cookie handler
   app.get('/set-cookie.html', (req, res) => {
     const cookieName = !!req.query.isFrame ? 'frame' : 'top-level';
-    
+
     // Set both partitioned and non-partitioned cookies
-    res.setHeader('Set-Cookie', [
+    const cookies = [
       `${cookieName}-partitioned=value; SameSite=None; Path=/; Secure; Partitioned;`,
       `${cookieName}-non-partitioned=value; SameSite=None; Path=/; Secure;`
-    ]);
-    res.end();
+    ];
+
+    res.setHeader('Set-Cookie', cookies);
+    res.setHeader('Content-Type', 'text/html');
+
+    // Create HTML response showing the cookies being set
+    res.end(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Set Cookie Response</title>
+          <style>
+            body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 0 20px; }
+            .cookie-container {
+              background-color: #f5f5f5;
+              padding: 20px;
+              border-radius: 8px;
+              margin-top: 20px;
+            }
+            .cookie-value {
+              font-family: monospace;
+              padding: 10px;
+              margin: 5px 0;
+              background-color: white;
+              border: 1px solid #ddd;
+              border-radius: 4px;
+            }
+            .cookie-value strong {
+              color: #2c5282;
+            }
+          </style>
+        </head>
+        <body>
+          <h2>Response headers:</h2>
+          <div class="cookie-container">
+            ${cookies.map(cookie => `
+              <div class="cookie-value"><strong>Set-Cookie:</strong> ${cookie}</div>
+            `).join('')}
+          </div>
+        </body>
+      </html>
+    `);
   });
 }
 
@@ -190,7 +230,7 @@ function startLocalServer() {
   // Start both servers
   https.createServer(options, app).listen(port, () => {
     console.log(`Server running at https://localhost:${port}`);
-  });  
+  });
 }
 
 function startAzureServer() {

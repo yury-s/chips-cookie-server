@@ -45,37 +45,111 @@ const urls = createUrls(
 // Common cookie handlers for both apps
 function addCommonCookieHandlers(app, urls) {
   app.get('/', (req, res) => {
-    res.send('Hello from HTTPS!');
+    res.setHeader('Content-Type', 'text/html');
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Cookie Test URLs</title>
+          <style>
+            body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 0 20px; }
+            .button-group { margin-bottom: 20px; }
+            h2 { color: #333; }
+            button {
+              display: block;
+              margin: 10px 0;
+              padding: 10px 15px;
+              background-color: #4CAF50;
+              color: white;
+              border: none;
+              border-radius: 4px;
+              cursor: pointer;
+              width: 100%;
+              text-align: left;
+            }
+            button:hover { background-color: #45a049; }
+          </style>
+        </head>
+        <body>
+          <h1>Cookie Test URLs</h1>
+          
+          <div class="button-group">
+            <h2>Read Cookie Tests</h2>
+            <button onclick="window.open('${urls.read_origin1}', '_blank')">Read Cookie (Origin 1)</button>
+            <button onclick="window.open('${urls.read_origin2_origin1}', '_blank')">Read Cookie (Origin 2 &rarr; Origin 1)</button>
+            <button onclick="window.open('${urls.read_origin1_origin1}', '_blank')">Read Cookie (Origin 1 &rarr; Origin 1)</button>
+            <button onclick="window.open('${urls.read_origin1_origin2_origin1}', '_blank')">Read Cookie (Origin 1 &rarr; Origin 2 &rarr; Origin 1)</button>
+          </div>
+
+          <div class="button-group">
+            <h2>Set Cookie Tests</h2>
+            <button onclick="window.open('${urls.set_origin1}', '_blank')">Set Cookie (Origin 1)</button>
+            <button onclick="window.open('${urls.set_origin2_origin1}', '_blank')">Set Cookie (Origin 2 &rarr; Origin 1)</button>
+            <button onclick="window.open('${urls.set_origin1_origin2_origin1}', '_blank')">Set Cookie (Origin 1 &rarr; Origin 2 &rarr; Origin 1)</button>
+          </div>
+        </body>
+      </html>
+    `;
+    res.end(html);
   });
 
   // Read cookie handler
   app.get('/read-cookie.html', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
-    const cookies = req.headers.cookie?.split(';').map(c => c.trim()).sort().join('; ');
-    res.end(`Received cookie: ${cookies}`);
+    const cookies = req.headers.cookie?.split(';').map(c => c.trim()).sort() || [];
+    
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Received Cookies</title>
+          <style>
+            body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 0 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+            th { background-color: #f5f5f5; }
+            tr:hover { background-color: #f9f9f9; }
+          </style>
+        </head>
+        <body>
+          <h2>Received Cookies</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Cookie</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${cookies.map(cookie => `<tr><td>${cookie}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+    res.end(html);
   });
 
   // Frame set cookie handler
   app.get('/frame-set-cookie.html', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
-    res.end(`<iframe src='${urls.origin1}/set-cookie.html'></iframe>`);
+    res.end(`<iframe src='${urls.origin1}/set-cookie.html' width="100%" height="600px" style="border: none;"></iframe>`);
   });
 
   // Frame read cookie handler
   app.get('/frame-read-cookie.html', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
-    res.end(`<iframe src='${urls.origin1}/read-cookie.html'></iframe>`);
+    res.end(`<iframe src='${urls.origin1}/read-cookie.html' width="100%" height="600px" style="border: none;"></iframe>`);
   });
 
   // Nested frame handlers
   app.get('/nested-frame-set-cookie.html', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
-    res.end(`<iframe src='${urls.origin2}/frame-set-cookie.html'></iframe>`);
+    res.end(`<iframe src='${urls.origin2}/frame-set-cookie.html' width="100%" height="600px" style="border: none;"></iframe>`);
   });
 
   app.get('/nested-frame-read-cookie.html', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
-    res.end(`<iframe src='${urls.origin2}/frame-read-cookie.html'></iframe>`);
+    res.end(`<iframe src='${urls.origin2}/frame-read-cookie.html' width="100%" height="600px" style="border: none;"></iframe>`);
   });
 
   // Set cookie handler

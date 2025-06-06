@@ -58,7 +58,7 @@ function addCommonCookieHandlers(app, urls) {
             body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 0 20px; }
             .button-group { margin-bottom: 20px; }
             h2 { color: #333; }
-            button {
+            .nav-link {
               display: block;
               margin: 10px 0;
               padding: 10px 15px;
@@ -69,8 +69,9 @@ function addCommonCookieHandlers(app, urls) {
               cursor: pointer;
               width: 100%;
               text-align: left;
+              text-decoration: none;
             }
-            button:hover { background-color: #45a049; }
+            .nav-link:hover { background-color: #45a049; }
           </style>
         </head>
         <body>
@@ -78,17 +79,17 @@ function addCommonCookieHandlers(app, urls) {
           
           <div class="button-group">
             <h2>Read Cookie Tests</h2>
-            <button onclick="window.open('${urls.read_origin1}', '_blank')">Read Cookie (Origin 1)</button>
-            <button onclick="window.open('${urls.read_origin2_origin1}', '_blank')">Read Cookie (Origin 2 &rarr; Origin 1)</button>
-            <button onclick="window.open('${urls.read_origin1_origin1}', '_blank')">Read Cookie (Origin 1 &rarr; Origin 1)</button>
-            <button onclick="window.open('${urls.read_origin1_origin2_origin1}', '_blank')">Read Cookie (Origin 1 &rarr; Origin 2 &rarr; Origin 1)</button>
+            <a href="${urls.read_origin1}" class="nav-link">Read Cookie (Origin 1)</a>
+            <a href="${urls.read_origin2_origin1}" class="nav-link">Read Cookie (Origin 2 &rarr; Origin 1)</a>
+            <a href="${urls.read_origin1_origin1}" class="nav-link">Read Cookie (Origin 1 &rarr; Origin 1)</a>
+            <a href="${urls.read_origin1_origin2_origin1}" class="nav-link">Read Cookie (Origin 1 &rarr; Origin 2 &rarr; Origin 1)</a>
           </div>
 
           <div class="button-group">
             <h2>Set Cookie Tests</h2>
-            <button onclick="window.open('${urls.set_origin1}', '_blank')">Set Cookie (Origin 1)</button>
-            <button onclick="window.open('${urls.set_origin2_origin1}', '_blank')">Set Cookie (Origin 2 &rarr; Origin 1)</button>
-            <button onclick="window.open('${urls.set_origin1_origin2_origin1}', '_blank')">Set Cookie (Origin 1 &rarr; Origin 2 &rarr; Origin 1)</button>
+            <a href="${urls.set_origin1}" class="nav-link">Set Cookie (Origin 1)</a>
+            <a href="${urls.set_origin2_origin1}" class="nav-link">Set Cookie (Origin 2 &rarr; Origin 1)</a>
+            <a href="${urls.set_origin1_origin2_origin1}" class="nav-link">Set Cookie (Origin 1 &rarr; Origin 2 &rarr; Origin 1)</a>
           </div>
         </body>
       </html>
@@ -99,7 +100,6 @@ function addCommonCookieHandlers(app, urls) {
   // Read cookie handler
   app.get('/read-cookie.html', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
-    console.log('query', req.query);
     const cookies = req.headers.cookie?.split(';').map(c => c.trim()).sort() || [];
     
     const html = `

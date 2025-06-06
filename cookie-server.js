@@ -36,13 +36,13 @@ function createUrls(origin1, origin2) {
 // Azure App Service terminates HTTPS at the front-end (Azure Load Balancer) →
 // forwards to your app over HTTP on the internal port.
 const port = process.env.PORT || 3000;
-const hostname = process.env.HOSTNAME || `localhost`;
-const ip = process.env.IP || `127.0.0.1`;
+const origin1 = process.env.ORIGIN1 || `localhost:${port}`;
+const origin2 = process.env.ORIGIN2 || `127.0.0.1:${port}`;
 
 // Create URLs for both origins
 const urls = createUrls(
-  `https://${hostname}:${port}`,
-  `https://${ip}:${port}`
+  `https://${origin1}`,
+  `https://${origin2}`
 );
 
 // Common cookie handlers for both apps

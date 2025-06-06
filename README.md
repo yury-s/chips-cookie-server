@@ -1,6 +1,6 @@
 # Cookie Server
 
-A test server for experimenting with CHIPS (Cookies Having Independent Partitioned State) behavior across different origins and frames. Particularly useful for testing Safari 18.4+ which added support for partitioned cookies.
+A test server for experimenting with [CHIPS](https://github.com/privacycg/CHIPS) (Cookies Having Independent Partitioned State) behavior across different origins and frames. Particularly useful for testing Safari 18.4+ which [added support](https://developer.apple.com/documentation/safari-release-notes/safari-18_4-release-notes#Networking) for partitioned cookies.
 
 ## Features
 

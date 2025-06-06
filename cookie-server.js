@@ -99,6 +99,7 @@ function addCommonCookieHandlers(app, urls) {
   // Read cookie handler
   app.get('/read-cookie.html', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
+    console.log('query', req.query);
     const cookies = req.headers.cookie?.split(';').map(c => c.trim()).sort() || [];
     
     const html = `
@@ -135,30 +136,29 @@ function addCommonCookieHandlers(app, urls) {
   // Frame set cookie handler
   app.get('/frame-set-cookie.html', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
-    res.end(`<iframe src='${urls.origin1}/set-cookie.html' width="100%" height="600px" style="border: none;"></iframe>`);
+    res.end(`<iframe src='${urls.origin1}/set-cookie.html?isFrame=true' width="100%" height="580px" style="border: 1px solid rgb(122, 50, 50);"></iframe>`);
   });
 
   // Frame read cookie handler
   app.get('/frame-read-cookie.html', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
-    res.end(`<iframe src='${urls.origin1}/read-cookie.html' width="100%" height="600px" style="border: none;"></iframe>`);
+    res.end(`<iframe src='${urls.origin1}/read-cookie.html' width="100%" height="580px" style="border: 1px solid rgb(122, 50, 50);"></iframe>`);
   });
 
   // Nested frame handlers
   app.get('/nested-frame-set-cookie.html', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
-    res.end(`<iframe src='${urls.origin2}/frame-set-cookie.html' width="100%" height="600px" style="border: none;"></iframe>`);
+    res.end(`<iframe src='${urls.origin2}/frame-set-cookie.html' width="100%" height="600px" style="border: 1px solid rgb(145, 169, 148);"></iframe>`);
   });
 
   app.get('/nested-frame-read-cookie.html', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
-    res.end(`<iframe src='${urls.origin2}/frame-read-cookie.html' width="100%" height="600px" style="border: none;"></iframe>`);
+    res.end(`<iframe src='${urls.origin2}/frame-read-cookie.html' width="100%" height="600px" style="border: 1px solid rgb(145, 169, 148);"></iframe>`);
   });
 
   // Set cookie handler
   app.get('/set-cookie.html', (req, res) => {
-    const isFrame = req.headers.referer;
-    const cookieName = isFrame ? 'frame' : 'top-level';
+    const cookieName = !!req.query.isFrame ? 'frame' : 'top-level';
     
     // Set both partitioned and non-partitioned cookies
     res.setHeader('Set-Cookie', [

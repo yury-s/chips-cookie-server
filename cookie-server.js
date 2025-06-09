@@ -47,6 +47,44 @@ const urls = createUrls(
 
 // Common cookie handlers for both apps
 function addCommonCookieHandlers(app, urls) {
+  // Shared HTML template for cookie responses
+  const cookieResponseTemplate = (title, cookies) => `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>${title}</title>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 0 20px; }
+          .cookie-container {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+          }
+          .cookie-value {
+            font-family: monospace;
+            padding: 10px;
+            margin: 5px 0;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+          }
+          .cookie-value strong {
+            color: #2c5282;
+          }
+        </style>
+      </head>
+      <body>
+        <h2>Response headers:</h2>
+        <div class="cookie-container">
+          ${cookies.map(cookie => `
+            <div class="cookie-value"><strong>Set-Cookie:</strong> ${cookie}</div>
+          `).join('')}
+        </div>
+      </body>
+    </html>
+  `;
+
   app.get('/', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
     const html = `
@@ -86,10 +124,15 @@ function addCommonCookieHandlers(app, urls) {
           </div>
 
           <div class="button-group">
-            <h2>Set Cookie Tests</h2>
+            <h2>Set Partitioned Cookie Tests</h2>
             <a href="${urls.set_origin1}" class="nav-link">Set Cookie (Origin 1)</a>
             <a href="${urls.set_origin2_origin1}" class="nav-link">Set Cookie (Origin 2 &rarr; Origin 1)</a>
             <a href="${urls.set_origin1_origin2_origin1}" class="nav-link">Set Cookie (Origin 1 &rarr; Origin 2 &rarr; Origin 1)</a>
+          </div>
+
+          <div class="button-group">
+            <h2>Set SameSite Cookie Test</h2>
+            <a href="${urls.origin1}/set-same-site-cookie.html" class="nav-link">Set Cookie (Origin 1)</a>
           </div>
         </body>
       </html>
@@ -145,17 +188,6 @@ function addCommonCookieHandlers(app, urls) {
     res.end(`<iframe src='${urls.origin1}/read-cookie.html' width="100%" height="580px" style="border: 1px solid rgb(122, 50, 50);"></iframe>`);
   });
 
-  // Nested frame handlers
-  app.get('/nested-frame-set-cookie.html', (req, res) => {
-    res.setHeader('Content-Type', 'text/html');
-    res.end(`<iframe src='${urls.origin2}/frame-set-cookie.html' width="100%" height="600px" style="border: 1px solid rgb(145, 169, 148);"></iframe>`);
-  });
-
-  app.get('/nested-frame-read-cookie.html', (req, res) => {
-    res.setHeader('Content-Type', 'text/html');
-    res.end(`<iframe src='${urls.origin2}/frame-read-cookie.html' width="100%" height="600px" style="border: 1px solid rgb(145, 169, 148);"></iframe>`);
-  });
-
   // Set cookie handler
   app.get('/set-cookie.html', (req, res) => {
     const cookieName = !!req.query.isFrame ? 'frame' : 'top-level';
@@ -168,44 +200,44 @@ function addCommonCookieHandlers(app, urls) {
 
     res.setHeader('Set-Cookie', cookies);
     res.setHeader('Content-Type', 'text/html');
+    res.end(cookieResponseTemplate('Set Cookie Response', cookies));
+  });
 
-    // Create HTML response showing the cookies being set
-    res.end(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Set Cookie Response</title>
-          <style>
-            body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 0 20px; }
-            .cookie-container {
-              background-color: #f5f5f5;
-              padding: 20px;
-              border-radius: 8px;
-              margin-top: 20px;
-            }
-            .cookie-value {
-              font-family: monospace;
-              padding: 10px;
-              margin: 5px 0;
-              background-color: white;
-              border: 1px solid #ddd;
-              border-radius: 4px;
-            }
-            .cookie-value strong {
-              color: #2c5282;
-            }
-          </style>
-        </head>
-        <body>
-          <h2>Response headers:</h2>
-          <div class="cookie-container">
-            ${cookies.map(cookie => `
-              <div class="cookie-value"><strong>Set-Cookie:</strong> ${cookie}</div>
-            `).join('')}
-          </div>
-        </body>
-      </html>
-    `);
+  // Set SameSite cookie handler
+  app.get('/set-same-site-cookie.html', (req, res) => {
+    // Set cookies with different SameSite values and security attributes
+    const cookies = [
+      // Strict cookies
+      `same-site-strict=value; SameSite=Strict; Path=/;`,
+      `same-site-strict-secure=value; SameSite=Strict; Path=/; Secure;`,
+
+      // Lax cookies
+      `same-site-lax=value; SameSite=Lax; Path=/;`,
+      `same-site-lax-secure=value; SameSite=Lax; Path=/; Secure;`,
+
+      // None cookies
+      `same-site-none=value; SameSite=None; Path=/;`,
+      `same-site-none-secure=value; SameSite=None; Path=/; Secure;`,
+
+      // SameSite unset cookies
+      `same-site-unset=value; Path=/;`,
+      `same-site-unset-secure=value; Path=/; Secure;`
+    ];
+
+    res.setHeader('Set-Cookie', cookies);
+    res.setHeader('Content-Type', 'text/html');
+    res.end(cookieResponseTemplate('Set SameSite Cookie Response', cookies));
+  });
+
+  // Nested frame handlers
+  app.get('/nested-frame-set-cookie.html', (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
+    res.end(`<iframe src='${urls.origin2}/frame-set-cookie.html' width="100%" height="600px" style="border: 1px solid rgb(145, 169, 148);"></iframe>`);
+  });
+
+  app.get('/nested-frame-read-cookie.html', (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
+    res.end(`<iframe src='${urls.origin2}/frame-read-cookie.html' width="100%" height="600px" style="border: 1px solid rgb(145, 169, 148);"></iframe>`);
   });
 }
 
